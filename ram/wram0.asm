@@ -1461,7 +1461,8 @@ wInitialOptions2::
 ; bit 2: no exp on/off (cannot be set together with scaled exp)
 ; bit 3: use RTC
 ; bit 4: evolve in battle
-; bits 5-6: unused
+; bit 5: unused
+; bit 6: no random encounters during a DexNav hunt
 ; bit 7: ask to reset at start
 	db
 wOptionsEnd::
@@ -1500,3 +1501,44 @@ wResolvedObjectPals:: ds NUM_OBJECT_STRUCTS
 ; Invalidate the selected map rectangle palettes across text/menu rendering.
 wPaletteSwapNeedsReload:: db
 wPaletteSwapReloadMask:: db
+
+
+SECTION "DexNav WRAM0", WRAM0
+
+; Scratch that's never needed at the same time, so it shares space.
+UNION
+; Species list for the DexNav menu: count, (species, form) * count, -1.
+; The evening list can combine the day and night tables. Only read while
+; the menu is open.
+wDexNavList:: ds 1 + DEXNAV_LIST_MAX * 2 + 1
+NEXTU
+; Which tiles around the player a hunt target can use (DexNav_StartHunt)
+wDexNavReach:: ds DEXNAV_REACH_SIZE * DEXNAV_REACH_SIZE
+wDexNavReachMode:: db ; LAND_TILE or WATER_TILE
+NEXTU
+; DexNav_SuccessRoll
+wDexNavOddsPrev:: db
+wDexNavOddsSum:: db
+ENDU
+
+wDexNavListCursor:: db
+
+; Active hunt: the rustle's object struct index (0 = no hunt) and its coords.
+wDexNavHuntObject:: db
+wDexNavHuntX:: db
+wDexNavHuntY:: db
+; What the hunt is for (separate from the list's last target, D19)
+wDexNavHuntSpecies:: db
+wDexNavHuntForm:: db
+wDexNavHuntFlags:: db
+; Boosts rolled when the hunt starts (D20)
+wDexNavHuntAbility:: db ; HIDDEN_ABILITY or 0
+wDexNavHuntPotential:: db ; number of perfect stats, 0-3
+wDexNavHuntEggMove:: db ; replaces move slot 1, or 0
+wDexNavHuntShinyPasses:: db ; extra shiny checks (D10)
+wDexNavHuntItem:: db ; held item rolled at hunt start (D27), or NO_ITEM
+wDexNavHuntLevelBonus:: db ; added to the wild level (chain)
+; Steps taken since the hunt started
+wDexNavHuntSteps:: db
+; Set by a failed search; cleared by taking a step or picking another species.
+wDexNavCooldown:: db
