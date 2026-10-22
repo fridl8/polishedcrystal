@@ -789,7 +789,7 @@ EffectSporeAbility:
 	call GetBattleVarAddr
 	ld a, [hl]
 	and a
-	ret z
+	ret nz
 	push hl
 	ld hl, CanSleepTarget
 	ld c, SLP_MASK
@@ -1904,6 +1904,7 @@ PixilateAbility:
 GalvanizeAbility:
 	ld b, ELECTRIC
 AteAbilities:
+; GetPlayerMoveDisplayType (core.asm) shows this type change in the move menu.
 	ld a, BATTLE_VARS_MOVE_TYPE
 	call GetBattleVarAddr
 	ld a, [hl]
